@@ -103,9 +103,14 @@ export function handleKeyboard(deltaTime) {
         if (keyS) camera.position.sub(direction.clone().multiplyScalar(movementSpeed * deltaTime));
         if (keyA) camera.position.sub(right.clone().multiplyScalar(movementSpeed * deltaTime));
         if (keyD) camera.position.add(right.clone().multiplyScalar(movementSpeed * deltaTime));
+        
+        //FOR TESTING
+        // Vertical movement (up and down along Y-axis)
+        if (keyQ) camera.position.y += movementSpeed * deltaTime; // Move up
+        if (keyE) camera.position.y -= movementSpeed * deltaTime; // Move down
 
         // Lock Y height
-        camera.position.y = cameraHeight;
+        // camera.position.y = cameraHeight;
     } else {
         // Walking on x-y surface
         camera.getWorldDirection(direction);

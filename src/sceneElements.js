@@ -3,7 +3,8 @@ const sceneElements = {
     camera: null,
     control: null,
     renderer: null,
-    collidableObjects: []
+    collidableObjects: [],
+    collidableObjectsMap: new Map() 
 };
 
 export default sceneElements;

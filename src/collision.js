@@ -8,19 +8,6 @@ const cameraHalfHeight = 0.1 * MAZE_SCALE; // For vertical collision checks
 export { cameraHeight };
 
 
-
-// export function checkCollisions(newPosition) {
-//     // Create camera collision volume (cylinder shape)
-//     const cameraCylinder = {
-//         position: new THREE.Vector3(newPosition.x, newPosition.y, newPosition.z),
-//         radius: cameraRadius,
-//         halfHeight: cameraHalfHeight
-//     };
-
-//     return sceneElements.collidableObjects.some(wallBox => {
-//         return cylinderBoxIntersect(cameraCylinder, wallBox);
-//     });
-// }
 export function checkCollisions(newPosition) {
     // Create camera collision volume (sphere shape)
     const cameraSphere = {
@@ -33,30 +20,6 @@ export function checkCollisions(newPosition) {
     });
 }
 
-
-
-
-
-
-// export function cylinderBoxIntersect(cylinder, box){
-//     // Find closest point on box to cylinder center
-//     const closest = new THREE.Vector3();
-//     closest.x = THREE.MathUtils.clamp(cylinder.position.x, box.min.x, box.max.x);
-//     closest.y = THREE.MathUtils.clamp(cylinder.position.y, box.min.y, box.max.y);
-//     closest.z = THREE.MathUtils.clamp(cylinder.position.z, box.min.z, box.max.z);
-
-//     // Check vertical overlap
-//     const verticalOverlap = Math.abs(closest.y - cylinder.position.y) < 
-//                         (cylinder.halfHeight + (box.max.y - box.min.y)/2);
-
-//     // Check horizontal distance
-//     const horizontalDist = Math.sqrt(
-//         (closest.x - cylinder.position.x) ** 2 +
-//         (closest.z - cylinder.position.z) ** 2
-//     );
-
-//     return verticalOverlap && (horizontalDist < cylinder.radius);
-// }
 export function sphereBoxIntersect(sphere, box) {
     // Find the closest point on the box to the sphere's center
     const closest = new THREE.Vector3();
@@ -75,30 +38,6 @@ export function sphereBoxIntersect(sphere, box) {
     return distance < sphere.radius;
 }
 
-
-
-
-
-
-
-// export function adjustPosition(oldPos, newPos) {
-//     const direction = new THREE.Vector3().subVectors(newPos, oldPos).normalize();
-//     const testPos = oldPos.clone();
-//     let safePos = oldPos.clone();
-    
-//     // Raycast check
-//     const raycaster = new THREE.Raycaster(oldPos, direction);
-//     const intersects = raycaster.intersectObjects(sceneElements.collidableObjects);
-    
-//     if(intersects.length > 0 && intersects[0].distance < this.cameraRadius) {
-//         safePos.addScaledVector(
-//             direction,
-//             intersects[0].distance - this.cameraRadius
-//         );
-//         return safePos;
-//     }
-//     return newPos;
-// }
 export function adjustPosition(oldPos, newPos) {
     const direction = new THREE.Vector3().subVectors(newPos, oldPos).normalize();
     const safePos = oldPos.clone();
@@ -117,16 +56,26 @@ export function adjustPosition(oldPos, newPos) {
     return newPos;
 }
 
-
-
-
-
-
-
 export function updateCollisionBoxes(group) {
     const collisionBoxes = [];
     const dummy = new THREE.Object3D();
 
+    // Remove previous collision boxes for this group
+    if (sceneElements.collidableObjectsMap.has(group)) {
+        const oldBoxes = sceneElements.collidableObjectsMap.get(group);
+        oldBoxes.forEach(box => {
+            // Remove any visual helpers from the scene
+            const helper = box.helper;
+            if (helper) {
+                sceneElements.sceneGraph.remove(helper);
+            }
+        });
+
+        // Remove the group from the map
+        sceneElements.collidableObjectsMap.delete(group);
+    }
+
+    // Traverse the group and calculate new collision boxes
     group.traverse((child) => {
         if (child.isInstancedMesh) {
             const geometry = child.geometry;
@@ -142,14 +91,19 @@ export function updateCollisionBoxes(group) {
                 const transformedBox = baseBox.clone().applyMatrix4(worldMatrix);
 
                 collisionBoxes.push(transformedBox);
+
+                // Visible helper for debugging
+                const boxHelper = new THREE.Box3Helper(transformedBox, 0xff0000);
+                sceneElements.sceneGraph.add(boxHelper);
+                transformedBox.helper = boxHelper; // Attach the helper to the box for easy removal
             }
         }
     });
 
-    // Append the new collision boxes to the existing ones
-    sceneElements.collidableObjects.push(...collisionBoxes);
+    // Update the map with the new collision boxes for this group
+    sceneElements.collidableObjectsMap.set(group, collisionBoxes);
 
-    console.log("Updated collision boxes:", collisionBoxes);
-    console.log("sceneElements.collidableObjects:", sceneElements.collidableObjects);
+    // Update the global collidableObjects array
+    sceneElements.collidableObjects = Array.from(sceneElements.collidableObjectsMap.values()).flat();
 }
 
