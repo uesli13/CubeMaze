@@ -12,7 +12,7 @@ export function initEmptyScene() {
     const width = window.innerWidth;
     const height = window.innerHeight;
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.01, 1000);
-    camera.position.set(5 * MAZE_SCALE, 3 * MAZE_SCALE, 0);
+    camera.position.set(5 * MAZE_SCALE, 3 * MAZE_SCALE, 5);
     camera.rotation.order = 'YXZ';
 
     sceneElements.camera = camera;
