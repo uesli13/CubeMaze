@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import sceneElements from './sceneElements.js';
 import { MAZE_SCALE } from './constants.js';
 import { wallCoords_1, wallCoords_2, wallCoords_3, connector1_2_coords, connector2_3_coords, connector3_4_coords, connector4_5_coords,connector5_6_coords } from './mazeData.js';
 
