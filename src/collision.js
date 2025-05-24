@@ -56,6 +56,36 @@ export function adjustPosition(oldPos, newPos) {
     return newPos;
 }
 
+export function trySlide(oldPos, newPos) {
+    const attempt = newPos.clone();
+
+    // Try full movement first
+    if (!checkCollisions(attempt)) {
+        return attempt;
+    }
+
+    // Try only X and Z movement
+    attempt.set(newPos.x, oldPos.y, newPos.z);
+    if (!checkCollisions(attempt)) {
+        return attempt;
+    }
+
+    // Try only X movement
+    attempt.set(newPos.x, oldPos.y, oldPos.z);
+    if (!checkCollisions(attempt)) {
+        return attempt;
+    }
+
+    // Try only Z movement
+    attempt.set(oldPos.x, oldPos.y, newPos.z);
+    if (!checkCollisions(attempt)) {
+        return attempt;
+    }
+
+    // If all fail, stay in place
+    return oldPos;
+}
+
 export function updateCollisionBoxes(group) {
     const collisionBoxes = [];
     const dummy = new THREE.Object3D();

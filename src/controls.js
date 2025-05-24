@@ -1,56 +1,95 @@
 import * as THREE from 'three';
 import sceneElements from './sceneElements.js';
 import { movementSpeed } from './constants.js';
-import { checkCollisions, adjustPosition, cameraHeight } from './collision.js';
+import { trySlide } from './collision.js';
 
-
-// Movement state
+// Key state
 let keyW = false, keyA = false, keyS = false, keyD = false;
 let keyQ = false, keyE = false;
-let keyF = false; // For toggling walking surface
+let key1 = false, key2 = false, key3 = false, key4 = false, key5 = false, key6 = false;
 
-export let isWalkingOnXZ = true; 
+export let currentFace = 'bottom';
 
 let targetRotation = new THREE.Euler(0, 0, 0); // Target rotation
-let isRotating = false; 
+let isRotating = false;
 
+// // Define all six cube faces
 
-// Movement and control setup
+export const cubeFaces = {
+    top: {normal: new THREE.Vector3(0, 1, 0),
+         up: new THREE.Vector3(0, 0, -1),
+         rotation: new THREE.Euler(Math.PI, -Math.PI/2, 0),
+         level:{y:25.5} },
+    
+    bottom: { normal: new THREE.Vector3(0, -1, 0), 
+        up: new THREE.Vector3(0, 0, 1), 
+        rotation: new THREE.Euler(0, 0, 0),
+        level:{y:1.5} },
+    
+    front:  { normal: new THREE.Vector3(0, 0, -1),
+        up: new THREE.Vector3(0, 1, 0),
+            rotation: new THREE.Euler(Math.PI / 2, 0, 0),
+            level: { z: -21.5 },},
+    
+    back:   { normal: new THREE.Vector3(0, 0, 1),
+           up: new THREE.Vector3(0, -1, 0),
+            rotation: new THREE.Euler(-Math.PI/2, 0, Math.PI/2),
+             level: { z: 2.5 } },
+    
+    left:   { normal: new THREE.Vector3(-1, 0, 0),
+          up: new THREE.Vector3(0, 1, 0),
+            rotation: new THREE.Euler(0, Math.PI , Math.PI / 2),
+             level: { x: -2.5 },},
+    
+    right:  { normal: new THREE.Vector3(1, 0, 0),
+           up: new THREE.Vector3(0, 1, 0),
+             rotation: new THREE.Euler(Math.PI, Math.PI, -Math.PI / 2),
+              level: { x: 21.5 } },
+};
+
+// Setup controls
 export function setupControls() {
-    // Keyboard listeners
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('keyup', onKeyUp);
 }
 
-// Keyboard event handlers
+// Switch active face
+function switchFace(faceName) {
+    const face = cubeFaces[faceName];
+    if (!face) return;
+
+    currentFace = faceName;
+    targetRotation.copy(face.rotation);
+    isRotating = true;
+    
+    const camera = sceneElements.camera;
+    if (face.level.x !== undefined) camera.position.x = face.level.x;
+    if (face.level.y !== undefined) camera.position.y = face.level.y;
+    if (face.level.z !== undefined) camera.position.z = face.level.z;
+
+}
+
+// Keydown event
 function onKeyDown(e) {
     switch (e.key.toLowerCase()) {
         case 'w': keyW = true; break;
         case 'a': keyA = true; break;
         case 's': keyS = true; break;
         case 'd': keyD = true; break;
-
         case 'q': keyQ = true; break;
         case 'e': keyE = true; break;
 
-        case 'f': 
-            if (!keyF) { // Ensure this runs only once per key press
-                keyF = true;
-                isWalkingOnXZ = !isWalkingOnXZ; // Toggle walking surface
-                console.log(`Walking on ${isWalkingOnXZ ? 'x-z' : 'x-y'} surface`);
-                
-                if (isWalkingOnXZ) {
-                    targetRotation.set(0, 0, 0); // Set target rotation for x-z surface
-                } else {
-                    targetRotation.set(Math.PI / 2, 0, 0); // Set target rotation for x-y surface
-                }
-                isRotating = true; // Start rotation
-            }
-            break;
-
+        // Toggle cube faces manually
+        case '1': if (!key1) { key1 = true; switchFace('bottom'); } break;
+        case '2': if (!key2) { key2 = true; switchFace('front'); } break;
+        case '3': if (!key3) { key3 = true; switchFace('left'); } break;
+        case '4': if (!key4) { key4 = true; switchFace('back'); } break;
+        case '5': if (!key5) { key5 = true; switchFace('right'); } break;
+        case '6': if (!key6) { key6 = true; switchFace('top'); } break;
     }
 }
 
+// Keyup event
 function onKeyUp(e) {
     switch (e.key.toLowerCase()) {
         case 'w': keyW = false; break;
@@ -59,79 +98,113 @@ function onKeyUp(e) {
         case 'd': keyD = false; break;
         case 'q': keyQ = false; break;
         case 'e': keyE = false; break;
-        case 'f': keyF = false; break;
 
+        case '1': key1 = false; break;
+        case '2': key2 = false; break;
+        case '3': key3 = false; break;
+        case '4': key4 = false; break;
+        case '5': key5 = false; break;
+        case '6': key6 = false; break;
     }
 }
 
-// Movement logic
+// Handle movement
 export function handleKeyboard(deltaTime) {
     const camera = sceneElements.camera;
     const oldPosition = camera.position.clone();
-    const direction = new THREE.Vector3();
+    const face = cubeFaces[currentFace];
 
-    // Smoothly interpolate camera rotation towards targetRotation only if rotating
+    // Smooth camera rotation
     if (isRotating) {
-        const rotationSpeed = 0.1; // Adjust the factor for speed
-        camera.rotation.x += (targetRotation.x - camera.rotation.x) * rotationSpeed;
-        camera.rotation.y += (targetRotation.y - camera.rotation.y) * rotationSpeed;
-        camera.rotation.z += (targetRotation.z - camera.rotation.z) * rotationSpeed;
+        const rotSpeed = 0.1;
+        camera.rotation.x += (targetRotation.x - camera.rotation.x) * rotSpeed;
+        camera.rotation.y += (targetRotation.y - camera.rotation.y) * rotSpeed;
+        camera.rotation.z += (targetRotation.z - camera.rotation.z) * rotSpeed;
 
-        // Check if the rotation is close enough to the target to stop interpolating
-        if (Math.abs(targetRotation.x - camera.rotation.x) < 0.01 &&
-            Math.abs(targetRotation.y - camera.rotation.y) < 0.01 &&
-            Math.abs(targetRotation.z - camera.rotation.z) < 0.01) {
-            camera.rotation.copy(targetRotation); // Snap to target rotation
-            isRotating = false; // Stop rotation
+        if (Math.abs(targetRotation.x - camera.rotation.x) < 0.1 &&
+            Math.abs(targetRotation.y - camera.rotation.y) < 0.1 &&
+            Math.abs(targetRotation.z - camera.rotation.z) < 0.1) {
+            camera.rotation.copy(targetRotation);
+            isRotating = false;
         }
     }
 
-    // Update camera rotation order based on walking surface
-    camera.rotation.order = isWalkingOnXZ ? 'YXZ' : 'ZXY';
+    // Compute forward and right vectors based on current face
+    const forward = new THREE.Vector3();
+    camera.getWorldDirection(forward);
+    forward.projectOnPlane(face.normal).normalize();
 
-    if (isWalkingOnXZ) {
-        // Walking on x-z surface
-        camera.getWorldDirection(direction);
-        direction.y = 0;
-        direction.normalize();
+    const right = new THREE.Vector3();
+    right.crossVectors(forward, face.normal).normalize();
 
-        const right = new THREE.Vector3();
-        right.crossVectors(direction, new THREE.Vector3(0, 1, 0));
+    // Build movement direction vector
+    const moveDirection = new THREE.Vector3();
 
-        // Movement
-        if (keyW) camera.position.add(direction.clone().multiplyScalar(movementSpeed * deltaTime));
-        if (keyS) camera.position.sub(direction.clone().multiplyScalar(movementSpeed * deltaTime));
-        if (keyA) camera.position.sub(right.clone().multiplyScalar(movementSpeed * deltaTime));
-        if (keyD) camera.position.add(right.clone().multiplyScalar(movementSpeed * deltaTime));
-        
-        //FOR TESTING
-        // Vertical movement (up and down along Y-axis)
-        if (keyQ) camera.position.y += movementSpeed * deltaTime; // Move up
-        if (keyE) camera.position.y -= movementSpeed * deltaTime; // Move down
+    if (keyW) moveDirection.add(forward);
+    if (keyS) moveDirection.sub(forward);
+    if (keyD) moveDirection.sub(right);
+    if (keyA) moveDirection.add(right);
 
-        // Lock Y height
-        // camera.position.y = cameraHeight;
-    } else {
-        // Walking on x-y surface
-        camera.getWorldDirection(direction);
-        direction.z = 0; // Ignore depth movement
-        direction.normalize();
+    // Optional: allow movement along the cube face normal for debugging
+    if (keyQ) moveDirection.add(face.normal.clone().negate());
+    if (keyE) moveDirection.add(face.normal.clone());
 
-        const up = new THREE.Vector3();
-        up.crossVectors(direction, new THREE.Vector3(0, 0, 1));
-
-        // Movement
-        if (keyW) camera.position.add(direction.clone().multiplyScalar(movementSpeed * deltaTime));
-        if (keyS) camera.position.sub(direction.clone().multiplyScalar(movementSpeed * deltaTime));
-        if (keyA) camera.position.sub(up.clone().multiplyScalar(movementSpeed * deltaTime));
-        if (keyD) camera.position.add(up.clone().multiplyScalar(movementSpeed * deltaTime));
-
-        // Lock Z height
-        camera.position.z = -20.5; // Adjust this value as needed
+    // Normalize and apply speed
+    if (moveDirection.length() > 0) {
+        moveDirection.normalize();
+        moveDirection.multiplyScalar(movementSpeed * deltaTime);
+        camera.position.add(moveDirection);
     }
 
-    // Collision check
-    if (checkCollisions(camera.position)) {
-        camera.position.copy(oldPosition);
+    // Collision detection
+
+    // if (checkCollisions(camera.position)) {
+    //     camera.position.copy(oldPosition);
+    // }
+
+    const proposedPosition = camera.position.clone();
+    const correctedPosition = trySlide(oldPosition, proposedPosition);
+    camera.position.copy(correctedPosition);
+
+
+    // Clamp the camera's position to stay within the map boundaries
+    camera.position.x = THREE.MathUtils.clamp(camera.position.x, sceneElements.BOUNDARIES.x.min, sceneElements.BOUNDARIES.x.max);
+    camera.position.y = THREE.MathUtils.clamp(camera.position.y, sceneElements.BOUNDARIES.y.min, sceneElements.BOUNDARIES.y.max);
+    camera.position.z = THREE.MathUtils.clamp(camera.position.z, sceneElements.BOUNDARIES.z.min, sceneElements.BOUNDARIES.z.max);
+
+    // Check for face change
+    switch (currentFace) {
+        case 'bottom':
+            if (camera.position.z < -21) {
+                switchFace('front');
+            }
+            break;
+
+        case 'front':
+            if (camera.position.x < -1) {
+                switchFace('left');
+            }
+            break;
+
+        case 'left':
+            if (camera.position.z > 2) {
+                switchFace('back');
+            }
+            break;
+
+        case 'back':
+            if (camera.position.x > 21) {
+                switchFace('right');
+            }
+            break;
+
+        case 'right':
+            if (camera.position.y > 25.5) {
+                switchFace('top');
+            }
+            break;
+
+        case 'top':
+            break;
     }
 }
