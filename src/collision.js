@@ -122,10 +122,10 @@ export function updateCollisionBoxes(group) {
 
                 collisionBoxes.push(transformedBox);
 
-                // Visible helper for debugging
-                const boxHelper = new THREE.Box3Helper(transformedBox, 0xff0000);
-                sceneElements.sceneGraph.add(boxHelper);
-                transformedBox.helper = boxHelper; // Attach the helper to the box for easy removal
+                // // Visible helper for debugging
+                // const boxHelper = new THREE.Box3Helper(transformedBox, 0xff0000);
+                // sceneElements.sceneGraph.add(boxHelper);
+                // transformedBox.helper = boxHelper; // Attach the helper to the box for easy removal
             }
         }
     });

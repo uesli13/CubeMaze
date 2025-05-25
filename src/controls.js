@@ -107,10 +107,73 @@ function onKeyUp(e) {
         case '6': key6 = false; break;
     }
 }
+function handleWinning(camera) {
+    if (sceneElements.isGameWon) return;
+
+    const doorPosition = new THREE.Vector3(-4, 26.5, -9.5);
+    const distanceToDoor = camera.position.distanceTo(doorPosition);
+
+    if (distanceToDoor < 2) {
+        sceneElements.isGameWon = true;
+        moveToWinningPosition(camera);
+    }
+}
+
+function moveToWinningPosition(camera) {
+    const targetPosition = sceneElements.winningPosition.clone();
+    const targetRotation = new THREE.Euler(0, 0, 0, 'YXZ');
+
+    const moveInterval = setInterval(() => {
+        // Smoothly move camera position
+        camera.position.lerp(targetPosition, 0.05);
+
+        // Smoothly rotate camera
+        camera.rotation.x += (targetRotation.x - camera.rotation.x) * 0.05;
+        camera.rotation.y += (targetRotation.y - camera.rotation.y) * 0.05;
+        camera.rotation.z += (targetRotation.z - camera.rotation.z) * 0.05;
+
+        if (camera.position.distanceTo(targetPosition) < 0.1) {
+            clearInterval(moveInterval);
+            displayWinMessage();
+        }
+    }, 16);
+}
+
+function displayWinMessage() {
+    const winDiv = document.createElement('div');
+    winDiv.style.position = 'absolute';
+    winDiv.style.top = '50%';
+    winDiv.style.left = '50%';
+    winDiv.style.transform = 'translate(-50%, -50%)';
+    winDiv.style.color = 'white';
+    winDiv.style.background = 'rgba(0, 0, 0, 0.8)';
+    winDiv.style.padding = '20px';
+    winDiv.style.fontSize = '24px';
+    winDiv.style.fontFamily = 'Arial, sans-serif';
+    winDiv.style.textAlign = 'center';
+    winDiv.style.borderRadius = '10px';
+    winDiv.innerHTML = `
+        <h1>Congratulations!</h1>
+        <p>You've escaped the cube maze!</p>
+        <p>Look around to enjoy the view...</p>
+    `;
+    document.body.appendChild(winDiv);
+}
 
 // Handle movement
 export function handleKeyboard(deltaTime) {
     const camera = sceneElements.camera;
+    
+    // Check for winning condition on top face
+    if (currentFace === 'top') {
+        handleWinning(camera);
+    }
+
+    // If game is won, disable movement
+    if (sceneElements.isGameWon) {
+        return;
+    }
+
     const oldPosition = camera.position.clone();
     const face = cubeFaces[currentFace];
 
