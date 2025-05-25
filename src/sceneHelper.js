@@ -1,13 +1,21 @@
 import * as THREE from 'three';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import sceneElements from './sceneElements.js';
 import { mouseSensitivity } from './constants.js';
 import { MAZE_SCALE } from './constants.js';
-// import {isWalkingOnXZ}  from './controls.js';
 import { cubeFaces, currentFace }  from './controls.js';
 
 export function initEmptyScene() {
     // Scene
     sceneElements.sceneGraph = new THREE.Scene();
+
+    // Load HDR background
+    const loader = new RGBELoader();
+    loader.load('assets/hdri/sky.hdr', function(texture) {
+        texture.mapping = THREE.EquirectangularReflectionMapping;
+        sceneElements.sceneGraph.background = texture;
+        sceneElements.sceneGraph.environment = texture;
+    });
 
     // Camera
     const width = window.innerWidth;
@@ -28,10 +36,21 @@ export function initEmptyScene() {
     sceneElements.sceneGraph.add(spotLight);
 
     // Renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    // const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ 
+        antialias: true,
+        powerPreference: "high-performance"
+    });
+
     renderer.setSize(width, height);
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setClearColor('rgb(255, 255, 150)', 1.0);
+
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+
+
+    // renderer.setClearColor('rgb(255, 255, 150)', 1.0);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     document.getElementById('Tag3DScene').appendChild(renderer.domElement);
@@ -75,6 +94,15 @@ function onMouseMove(event) {
     if (document.pointerLockElement !== sceneElements.renderer.domElement) return;
 
     const sensitivity = mouseSensitivity;
+
+    // If game is won, use bottom-face-like controls
+    if (sceneElements.isGameWon) {
+        camera.rotation.order = 'YXZ';
+        camera.rotation.y -= event.movementX * sensitivity;
+        camera.rotation.x -= event.movementY * sensitivity;
+        camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+        return;
+    }
 
     switch (currentFace) {
         case 'bottom':

@@ -1,63 +1,7 @@
 import * as THREE from 'three';
 import { MAZE_SCALE } from './constants.js';
 import { wallCoords_1, wallCoords_2, wallCoords_3, connector1_2_coords, connector2_3_coords, connector3_4_coords, connector4_5_coords,connector5_6_coords } from './mazeData.js';
-
 import{ updateCollisionBoxes } from './collision.js';
-
-
-export function createPlaneBox(cubeSize = 1) {
-    const cubeFaces = new THREE.Group();
-    const faceGeometry = new THREE.PlaneGeometry(cubeSize, cubeSize);
-
-    const faceColors = [
-        0xff0000, 0x00ff00, 0x0000ff,
-        0xffff00, 0xff00ff, 0x00ffff
-    ];
-
-    const faceConfigs = [
-        { position: [0, 0, cubeSize / 2], rotation: new THREE.Euler(0, 0, 0) },
-        { position: [0, 0, -cubeSize / 2], rotation: new THREE.Euler(0, Math.PI, 0) },
-        { position: [cubeSize / 2, 0, 0], rotation: new THREE.Euler(0, Math.PI / 2, 0) },
-        { position: [-cubeSize / 2, 0, 0], rotation: new THREE.Euler(0, -Math.PI / 2, 0) },
-        { position: [0, cubeSize / 2, 0], rotation: new THREE.Euler(-Math.PI / 2, 0, 0) },
-        { position: [0, -cubeSize / 2, 0], rotation: new THREE.Euler(Math.PI / 2, 0, 0) }
-    ];
-
-    faceConfigs.forEach((config, i) => {
-        const material = new THREE.MeshPhongMaterial({
-            color: faceColors[i],
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.7
-        });
-        const face = new THREE.Mesh(faceGeometry, material);
-        face.position.set(...config.position);
-        face.setRotationFromEuler(config.rotation);
-        cubeFaces.add(face);
-    });
-
-    return cubeFaces;
-}
-
-export function createBox(size = 1, color = 0x00ff00) {
-    const geometry = new THREE.BoxGeometry(size, size, size);
-    const material = new THREE.MeshPhongMaterial({ color });
-    const box = new THREE.Mesh(geometry, material);
-    box.castShadow = true;
-    box.receiveShadow = true;
-    return box;
-}
-
-export function createWall(length) {
-    const wallHeight = 3;
-    const material = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
-    const geometry = new THREE.BoxGeometry(length, wallHeight, 1);
-    const wall = new THREE.Mesh(geometry, material);
-    wall.castShadow = true;
-    wall.receiveShadow = true;
-    wall.position.set(0, wallHeight / 2, 0);
-    return wall;
-}
 
 export function createPlaneWall(size, texture) {
     const geometry = new THREE.PlaneGeometry(size, size);
@@ -230,10 +174,62 @@ export function CreateFinalCube(){
     return group;
 
 }
+export function createPortal() {
+    const portalGroup = new THREE.Group();
+
+    // Create the door frame
+    const frameGeometry = new THREE.BoxGeometry(4, 5, 0.3);
+    const frameMaterial = new THREE.MeshStandardMaterial({ 
+        color: 0x8B4513, // Dark wood color
+        metalness: 0.3,
+        roughness: 0.7
+    });
+    const frame = new THREE.Mesh(frameGeometry, frameMaterial);
+
+    // Create a glimpse of the outside (background behind the door)
+    const backgroundGeometry = new THREE.PlaneGeometry(3.5, 4.5);
+    const backgroundMaterial = new THREE.MeshBasicMaterial({
+        color: 0x87CEEB, // Sky blue color
+        side: THREE.DoubleSide
+    });
+    const background = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
+    background.position.z = 0.1;
+
+    // Create the door
+    const doorGeometry = new THREE.BoxGeometry(3.5, 4.5, 0.2);
+    const doorMaterial = new THREE.MeshStandardMaterial({ 
+        color: 0x654321, // Brown wood color
+        metalness: 0.1,
+        roughness: 0.8
+    });
+    const door = new THREE.Mesh(doorGeometry, doorMaterial);
+    door.position.z = 0.2;
+
+    // Add door handle
+    const handleGeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.3, 8);
+    const handleMaterial = new THREE.MeshStandardMaterial({ 
+        color: 0xB87333, // Copper color
+        metalness: 0.8,
+        roughness: 0.2
+    });
+    const handle = new THREE.Mesh(handleGeometry, handleMaterial);
+    handle.rotation.x = Math.PI / 2;
+    handle.position.set(1.2, 0, 0.3);
+    door.add(handle);
+    
+    // Add everything to the portal group
+    portalGroup.add(frame);
+    portalGroup.add(background);
+    portalGroup.add(door);
+
+    // Store the door reference for animation
+    portalGroup.userData.door = door;
+    
+    return portalGroup;
+}
 
 
-
-export function exp1() {
+export function createMap() {
     const global_group = new THREE.Group();
 
     const wallsTexture_1 = new THREE.TextureLoader().load('assets/textures/Water_001_COLOR.jpg');
@@ -426,8 +422,15 @@ export function exp1() {
 
     const plane_6 = createPlaneWall(27, floorTexture_1);
     plane_6.position.set(9.5, 0, -9.5);
+    
+    const portal = createPortal();
+    portal.scale.set(0.5, 0.5, 0.5); // Scale down the portal
+    portal.position.set(-4, 1.5, -9.5); // Adjust height to 3 units
+    portal.rotation.x = Math.PI;
+    portal.rotation.y = Math.PI/2;
 
     side_6.add(plane_6);
+    side_6.add(portal);
 
     side_6.rotation.x = Math.PI;
     side_6.position.set(0, 27, -19);
@@ -457,27 +460,7 @@ export function exp1() {
 
 
 export function load3DObjects(sceneGraph) {
-
-    // const maze = createMaze();
-    // maze.position.set(0, 8, 0);
-    // sceneGraph.add(maze);
-    // maze.updateMatrixWorld(true);
-    // updateCollisionBoxes(maze);
-
-    // const plane = createPlaneWall(24);
-    // plane.position.set(9.5, 0, -9.5);
-    // sceneGraph.add(plane);
-
-
-
-    // const finalCube = CreateFinalCube();
-    // finalCube.position.set(0, 0, 0);
-    // sceneGraph.add(finalCube);
-    
-    const exp = exp1();
+    const exp = createMap();
     // exp.position.set(0, 0, 0);
     sceneGraph.add(exp);
-
-
-
 }
