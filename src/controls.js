@@ -155,7 +155,7 @@ function displayWinMessage() {
     winDiv.innerHTML = `
         <h1>Congratulations!</h1>
         <p>You've escaped the cube maze!</p>
-        <p>Look around to enjoy the view...</p>
+        <p>Look around to enjoy the view!</p>
     `;
     document.body.appendChild(winDiv);
 }

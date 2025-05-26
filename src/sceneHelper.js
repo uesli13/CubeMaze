@@ -27,16 +27,24 @@ export function initEmptyScene() {
     sceneElements.camera = camera;
 
     // Lights
-    const ambientLight = new THREE.AmbientLight('white', 0.5);
+    // Ambient light
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
     sceneElements.sceneGraph.add(ambientLight);
 
-    const spotLight = new THREE.SpotLight('white', 225);
-    spotLight.position.set(10, 20, -10);
-    spotLight.castShadow = true;
-    sceneElements.sceneGraph.add(spotLight);
+    // Main directional light
+    const mainLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    mainLight.position.set(10, 20, 10);
+    mainLight.castShadow = true;
+    mainLight.shadow.mapSize.width = 2048;
+    mainLight.shadow.mapSize.height = 2048;
+    sceneElements.sceneGraph.add(mainLight);
 
-    // Renderer
-    // const renderer = new THREE.WebGLRenderer({ antialias: true });
+    // Fill light
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+    fillLight.position.set(-10, 10, -10);
+    sceneElements.sceneGraph.add(fillLight);
+
+    // Renderer settings
     const renderer = new THREE.WebGLRenderer({ 
         antialias: true,
         powerPreference: "high-performance"
@@ -44,15 +52,11 @@ export function initEmptyScene() {
 
     renderer.setSize(width, height);
     renderer.setPixelRatio(window.devicePixelRatio);
-
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.0;
-    renderer.outputEncoding = THREE.sRGBEncoding;
-
-
-    // renderer.setClearColor('rgb(255, 255, 150)', 1.0);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
     document.getElementById('Tag3DScene').appendChild(renderer.domElement);
     sceneElements.renderer = renderer;
 
