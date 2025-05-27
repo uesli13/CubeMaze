@@ -1,10 +1,9 @@
 import * as THREE from 'three';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import sceneElements from './sceneElements.js';
-import { mouseSensitivity } from './constants.js';
-import { MAZE_SCALE } from './constants.js';
-import { cubeFaces, currentFace }  from './controls.js';
-
+import { currentFace }  from './controls.js';
+import { setupCamera } from './camera.js';
+import { setupLighting } from './lighting.js'; 
 export function initEmptyScene() {
     // Scene
     sceneElements.sceneGraph = new THREE.Scene();
@@ -15,46 +14,19 @@ export function initEmptyScene() {
         texture.mapping = THREE.EquirectangularReflectionMapping;
         sceneElements.sceneGraph.background = texture;
         sceneElements.sceneGraph.environment = texture;
+        sceneElements.sceneGraph.environmentIntensity = 0.8; // Adjust as needed
     });
 
     // Camera
     const width = window.innerWidth;
     const height = window.innerHeight;
-    const camera = new THREE.PerspectiveCamera(75, width / height, 0.01, 1000);
-    camera.position.set(5 * MAZE_SCALE, 1.5 * MAZE_SCALE, 3);
-    camera.rotation.order = 'YXZ';
-
-    sceneElements.camera = camera;
+    sceneElements.camera = setupCamera(width, height ,1);
 
     // Lights
-    // Ambient light (reduced intensity for a darker interior)
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); // Reduced intensity
-    sceneElements.sceneGraph.add(ambientLight);
+    setupLighting(sceneElements.sceneGraph);
 
-    // Directional light (sunlight coming from above)
-    const sunlight = new THREE.DirectionalLight(0xffffff, 1.0); // Bright sunlight
-    sunlight.position.set(0, 50, 0); // Position above the cube
-    sunlight.castShadow = true;
-    sunlight.shadow.mapSize.width = 2048;
-    sunlight.shadow.mapSize.height = 2048;
-    sunlight.shadow.camera.near = 1;
-    sunlight.shadow.camera.far = 100;
-    sunlight.shadow.camera.left = -50;
-    sunlight.shadow.camera.right = 50;
-    sunlight.shadow.camera.top = 50;
-    sunlight.shadow.camera.bottom = -50;
-    sceneElements.sceneGraph.add(sunlight);
 
-    // Spotlight to simulate light passing through the semi-transparent top face
-    const topLight = new THREE.SpotLight(0xffffff, 0.8, 100, Math.PI / 4, 0.5, 2);
-    topLight.position.set(0, 30, 0); // Position above the top face
-    topLight.target.position.set(0, 0, 0); // Pointing to the center of the cube
-    topLight.castShadow = true;
-    topLight.shadow.mapSize.width = 1024;
-    topLight.shadow.mapSize.height = 1024;
-    sceneElements.sceneGraph.add(topLight);
-    sceneElements.sceneGraph.add(topLight.target);
-
+    
     // Renderer settings
     const renderer = new THREE.WebGLRenderer({ 
         antialias: true,
@@ -107,8 +79,8 @@ function setupPointerLock(domElement) {
 function onMouseMove(event) {
     const camera = sceneElements.camera;
     if (document.pointerLockElement !== sceneElements.renderer.domElement) return;
-
-    const sensitivity = mouseSensitivity;
+    
+    const sensitivity = 0.002;
 
     // If game is won, use bottom-face-like controls
     if (sceneElements.isGameWon) {

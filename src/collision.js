@@ -1,18 +1,11 @@
 import * as THREE from 'three';
-import { MAZE_SCALE } from './constants.js';
 import sceneElements from './sceneElements.js';
-
-const cameraRadius = 0.1 * MAZE_SCALE;  // Reduced radius for narrower corridors
-const cameraHeight = 1.6 * MAZE_SCALE; // Eye level height
-const cameraHalfHeight = 0.1 * MAZE_SCALE; // For vertical collision checks
-export { cameraHeight };
-
 
 export function checkCollisions(newPosition) {
     // Create camera collision volume (sphere shape)
     const cameraSphere = {
         position: new THREE.Vector3(newPosition.x, newPosition.y, newPosition.z),
-        radius: cameraRadius
+        radius: 0.1
     };
 
     return sceneElements.collidableObjects.some(wallBox => {
@@ -20,7 +13,7 @@ export function checkCollisions(newPosition) {
     });
 }
 
-export function sphereBoxIntersect(sphere, box) {
+function sphereBoxIntersect(sphere, box) {
     // Find the closest point on the box to the sphere's center
     const closest = new THREE.Vector3();
     closest.x = THREE.MathUtils.clamp(sphere.position.x, box.min.x, box.max.x);
@@ -36,24 +29,6 @@ export function sphereBoxIntersect(sphere, box) {
 
     // Check if the distance is less than the sphere's radius
     return distance < sphere.radius;
-}
-
-export function adjustPosition(oldPos, newPos) {
-    const direction = new THREE.Vector3().subVectors(newPos, oldPos).normalize();
-    const safePos = oldPos.clone();
-
-    // Raycast check
-    const raycaster = new THREE.Raycaster(oldPos, direction);
-    const intersects = raycaster.intersectObjects(sceneElements.collidableObjects);
-
-    if (intersects.length > 0 && intersects[0].distance < cameraRadius) {
-        safePos.addScaledVector(
-            direction,
-            intersects[0].distance - cameraRadius
-        );
-        return safePos;
-    }
-    return newPos;
 }
 
 export function trySlide(oldPos, newPos) {

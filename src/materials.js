@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 const textureLoader = new THREE.TextureLoader();
 
-export const textures = {
+export const materials = {
     // Tiles 101
     tileMaterial_101: new THREE.MeshStandardMaterial({
         map: textureLoader.load('assets/textures/Tiles101/Tiles101_2K-JPG_Color.jpg'),
@@ -126,7 +126,7 @@ export const textures = {
 };
 
 // Configure texture settings (wrapping, repeating)
-Object.values(textures).forEach(material => {
+Object.values(materials).forEach(material => {
     if (material.map) {
         material.map.wrapS = THREE.RepeatWrapping;
         material.map.wrapT = THREE.RepeatWrapping;
@@ -166,14 +166,14 @@ function configureMaterial(material, repeatX, repeatY) {
     }
 }
 
-configureMaterial(textures.tileMaterial_101, 0.25, 0.5);
-configureMaterial(textures.PavingStonesMaterial_126A, 6, 6);
-configureMaterial(textures.tileMaterial_074, 1, 2);
-configureMaterial(textures.tileMaterial_081, 20, 20);
-configureMaterial(textures.DiamondPlateTexture_008D, 1, 2);
-configureMaterial(textures.rubberMaterial_004, 10, 10);
-configureMaterial(textures.tileMaterial_075, 0.5, 1);
-configureMaterial(textures.tileMaterial_029, 1, 1);
-configureMaterial(textures.woodFloorMaterial_017, 5, 5);
-configureMaterial(textures.woodFloorMaterial_048, 5, 5);
-configureMaterial(textures.metalWalkwayMaterial_010, 10, 10);
+configureMaterial(materials.tileMaterial_101, 0.25, 0.5);
+configureMaterial(materials.PavingStonesMaterial_126A, 6, 6);
+configureMaterial(materials.tileMaterial_074, 1, 2);
+configureMaterial(materials.tileMaterial_081, 20, 20);
+configureMaterial(materials.DiamondPlateTexture_008D, 1, 2);
+configureMaterial(materials.rubberMaterial_004, 10, 10);
+configureMaterial(materials.tileMaterial_075, 0.5, 1);
+configureMaterial(materials.tileMaterial_029, 1, 1);
+configureMaterial(materials.woodFloorMaterial_017, 5, 5);
+configureMaterial(materials.woodFloorMaterial_048, 5, 5);
+configureMaterial(materials.metalWalkwayMaterial_010, 10, 10);
