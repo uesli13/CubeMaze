@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { MAZE_SCALE } from './constants.js';
-import { wallCoords_1, wallCoords_2, wallCoords_3, connector1_2_coords, connector2_3_coords, connector3_4_coords, connector4_5_coords,connector5_6_coords } from './mazeData.js';
+import { entryCoords, wallCoords_1, wallCoords_2, wallCoords_3, connector1_2_coords, connector2_3_coords, connector3_4_coords, connector4_5_coords,connector5_6_coords } from './mazeData.js';
 import{ updateCollisionBoxes } from './collision.js';
 import { textures } from './textures.js';
 
@@ -98,6 +98,12 @@ function createPortal() {
 
 function createMap() {
     const global_group = new THREE.Group();
+
+    // Entry
+    const entry_walls = createMaze(textures.tileMaterial_029, entryCoords, 2);
+    entry_walls.position.set(0, 0, 0);
+    entry_walls.updateMatrixWorld(true);
+    updateCollisionBoxes(entry_walls);
 
     //Side 1
     const side_1 = new THREE.Group();
@@ -313,6 +319,7 @@ function createMap() {
     global_group.add(connection_3);
     global_group.add(connection_4);
     global_group.add(connection_5);
+    global_group.add(entry_walls);
 
     return global_group;
 }

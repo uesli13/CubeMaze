@@ -27,22 +27,33 @@ export function initEmptyScene() {
     sceneElements.camera = camera;
 
     // Lights
-    // Ambient light
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    // Ambient light (reduced intensity for a darker interior)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); // Reduced intensity
     sceneElements.sceneGraph.add(ambientLight);
 
-    // Main directional light
-    const mainLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    mainLight.position.set(10, 20, 10);
-    mainLight.castShadow = true;
-    mainLight.shadow.mapSize.width = 2048;
-    mainLight.shadow.mapSize.height = 2048;
-    sceneElements.sceneGraph.add(mainLight);
+    // Directional light (sunlight coming from above)
+    const sunlight = new THREE.DirectionalLight(0xffffff, 1.0); // Bright sunlight
+    sunlight.position.set(0, 50, 0); // Position above the cube
+    sunlight.castShadow = true;
+    sunlight.shadow.mapSize.width = 2048;
+    sunlight.shadow.mapSize.height = 2048;
+    sunlight.shadow.camera.near = 1;
+    sunlight.shadow.camera.far = 100;
+    sunlight.shadow.camera.left = -50;
+    sunlight.shadow.camera.right = 50;
+    sunlight.shadow.camera.top = 50;
+    sunlight.shadow.camera.bottom = -50;
+    sceneElements.sceneGraph.add(sunlight);
 
-    // Fill light
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
-    fillLight.position.set(-10, 10, -10);
-    sceneElements.sceneGraph.add(fillLight);
+    // Spotlight to simulate light passing through the semi-transparent top face
+    const topLight = new THREE.SpotLight(0xffffff, 0.8, 100, Math.PI / 4, 0.5, 2);
+    topLight.position.set(0, 30, 0); // Position above the top face
+    topLight.target.position.set(0, 0, 0); // Pointing to the center of the cube
+    topLight.castShadow = true;
+    topLight.shadow.mapSize.width = 1024;
+    topLight.shadow.mapSize.height = 1024;
+    sceneElements.sceneGraph.add(topLight);
+    sceneElements.sceneGraph.add(topLight.target);
 
     // Renderer settings
     const renderer = new THREE.WebGLRenderer({ 
