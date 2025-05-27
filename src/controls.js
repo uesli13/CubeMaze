@@ -2,18 +2,17 @@ import * as THREE from 'three';
 import sceneElements from './sceneElements.js';
 import { movementSpeed } from './constants.js';
 import { trySlide } from './collision.js';
+import { handleGameEnd } from './main.js';
 
 // Key state
 let keyW = false, keyA = false, keyS = false, keyD = false;
 let keyQ = false, keyE = false;
 let key1 = false, key2 = false, key3 = false, key4 = false, key5 = false, key6 = false;
 
-export let currentFace = 'bottom';
-
 let targetRotation = new THREE.Euler(0, 0, 0); // Target rotation
 let isRotating = false;
 
-// // Define all six cube faces
+export let currentFace = 'bottom';
 
 export const cubeFaces = {
     top: {normal: new THREE.Vector3(0, 1, 0),
@@ -76,16 +75,16 @@ function onKeyDown(e) {
         case 'a': keyA = true; break;
         case 's': keyS = true; break;
         case 'd': keyD = true; break;
-        case 'q': keyQ = true; break;
-        case 'e': keyE = true; break;
+        // case 'q': keyQ = true; break;
+        // case 'e': keyE = true; break;
 
         // Toggle cube faces manually
-        case '1': if (!key1) { key1 = true; switchFace('bottom'); } break;
-        case '2': if (!key2) { key2 = true; switchFace('front'); } break;
-        case '3': if (!key3) { key3 = true; switchFace('left'); } break;
-        case '4': if (!key4) { key4 = true; switchFace('back'); } break;
-        case '5': if (!key5) { key5 = true; switchFace('right'); } break;
-        case '6': if (!key6) { key6 = true; switchFace('top'); } break;
+        // case '1': if (!key1) { key1 = true; switchFace('bottom'); } break;
+        // case '2': if (!key2) { key2 = true; switchFace('front'); } break;
+        // case '3': if (!key3) { key3 = true; switchFace('left'); } break;
+        // case '4': if (!key4) { key4 = true; switchFace('back'); } break;
+        // case '5': if (!key5) { key5 = true; switchFace('right'); } break;
+        // case '6': if (!key6) { key6 = true; switchFace('top'); } break;
     }
 }
 
@@ -107,7 +106,8 @@ function onKeyUp(e) {
         case '6': key6 = false; break;
     }
 }
-function handleWinning(camera) {
+
+export function handleWinning(camera) {
     if (sceneElements.isGameWon) return;
 
     const doorPosition = new THREE.Vector3(-4, 26.5, -9.5);
@@ -116,6 +116,7 @@ function handleWinning(camera) {
     if (distanceToDoor < 2) {
         sceneElements.isGameWon = true;
         moveToWinningPosition(camera);
+        handleGameEnd(); // Stop the timer and display the completion time
     }
 }
 
@@ -134,30 +135,9 @@ function moveToWinningPosition(camera) {
 
         if (camera.position.distanceTo(targetPosition) < 0.1) {
             clearInterval(moveInterval);
-            displayWinMessage();
+            // displayWinMessage();
         }
     }, 16);
-}
-
-function displayWinMessage() {
-    const winDiv = document.createElement('div');
-    winDiv.style.position = 'absolute';
-    winDiv.style.top = '50%';
-    winDiv.style.left = '50%';
-    winDiv.style.transform = 'translate(-50%, -50%)';
-    winDiv.style.color = 'white';
-    winDiv.style.background = 'rgba(0, 0, 0, 0.8)';
-    winDiv.style.padding = '20px';
-    winDiv.style.fontSize = '24px';
-    winDiv.style.fontFamily = 'Arial, sans-serif';
-    winDiv.style.textAlign = 'center';
-    winDiv.style.borderRadius = '10px';
-    winDiv.innerHTML = `
-        <h1>Congratulations!</h1>
-        <p>You've escaped the cube maze!</p>
-        <p>Look around to enjoy the view!</p>
-    `;
-    document.body.appendChild(winDiv);
 }
 
 // Handle movement

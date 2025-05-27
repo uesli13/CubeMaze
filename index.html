@@ -17,20 +17,44 @@
             "three/addons/": "https://threejs.org/examples/jsm/"
           }
         }
-      </script>
-
+    </script>
 </head>
 
 <body>
-    <div id="Tag3DScene"> </div>
+    <!-- 3D Scene Container -->
+    <div id="Tag3DScene"></div>
 
-    <div id="coordinates" style="position: absolute; top: 10px; left: 10px; color: white; background: rgba(0, 0, 0, 0.5); padding: 5px; font-family: Arial, sans-serif;">
-      Coordinates: (x: 0, y: 0, z: 0)
-      
+    <!-- Main Menu -->
+    <div id="mainMenu">
+        <h1>Cube Maze</h1>
+        <button id="startGameButton">Start Game</button>
+        <button id="howToPlayButton">How to Play</button>
+    </div>
+
+    <!-- How to Play Modal -->
+    <div id="howToPlayModal" class="hidden">
+        <div id="howToPlayContent">
+            <h2>How to Play</h2>
+            <p>
+                You are trapped inside a mysterious <strong>Cube Maze</strong>, a labyrinth that spans all six sides of a giant cube. 
+                Your goal is to navigate through the interconnected mazes and find your way to freedom.
+            </p>
+            <p>
+                <strong>Controls:</strong>
+                <ul>
+                    <li>Use <strong>W</strong>, <strong>A</strong>, <strong>S</strong>, <strong>D</strong> to move forward, left, backward, and right.</li>
+                    <li>Move your mouse to look around and explore your surroundings.</li>
+                </ul>
+            </p>
+            <button id="closeHowToPlayButton">Close</button>
+        </div>
+    </div>
+
+    <div id="timer">Time: 0s</div>
+
     <script type="module">
         import './src/main.js';
     </script>
 </body>
 
 </html>
-    

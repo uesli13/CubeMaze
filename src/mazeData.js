@@ -1,5 +1,17 @@
 // src/mazeData.js
 
+
+export const entryCoords = [
+    { x: 3, y: 0, z: 1 },
+    { x: 3, y: 0, z: 2 },
+    { x: 3, y: 0, z: 3 },
+    { x: 4, y: 0, z: 4 },
+    { x: 5, y: 0, z: 4 },
+    { x: 6, y: 0, z: 4 },
+    { x: 7, y: 0, z: 3 },
+    { x: 7, y: 0, z: 2 },
+    { x: 7, y: 0, z: 1 },
+]
 export const wallCoords_1 = [
     //wall_1
     { x:0 , y:0 , z:0  },
