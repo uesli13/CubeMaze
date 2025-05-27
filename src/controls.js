@@ -1,16 +1,16 @@
 import * as THREE from 'three';
 import sceneElements from './sceneElements.js';
-import { movementSpeed } from './constants.js';
 import { trySlide } from './collision.js';
-import { handleGameEnd } from './main.js';
+import { handleGameEnd } from './timer.js';
 
-// Key state
 let keyW = false, keyA = false, keyS = false, keyD = false;
 let keyQ = false, keyE = false;
 let key1 = false, key2 = false, key3 = false, key4 = false, key5 = false, key6 = false;
 
 let targetRotation = new THREE.Euler(0, 0, 0); // Target rotation
 let isRotating = false;
+
+const movementSpeed = 5; 
 
 export let currentFace = 'bottom';
 
@@ -107,7 +107,7 @@ function onKeyUp(e) {
     }
 }
 
-export function handleWinning(camera) {
+function handleWinning(camera) {
     if (sceneElements.isGameWon) return;
 
     const doorPosition = new THREE.Vector3(-4, 26.5, -9.5);
@@ -141,7 +141,7 @@ function moveToWinningPosition(camera) {
 }
 
 // Handle movement
-export function handleKeyboard(deltaTime) {
+export function updateMovement(deltaTime) {
     const camera = sceneElements.camera;
     
     // Check for winning condition on top face
@@ -159,7 +159,7 @@ export function handleKeyboard(deltaTime) {
 
     // Smooth camera rotation
     if (isRotating) {
-        const rotSpeed = 0.1;
+        const rotSpeed = 0.03;
         camera.rotation.x += (targetRotation.x - camera.rotation.x) * rotSpeed;
         camera.rotation.y += (targetRotation.y - camera.rotation.y) * rotSpeed;
         camera.rotation.z += (targetRotation.z - camera.rotation.z) * rotSpeed;

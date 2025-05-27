@@ -1,8 +1,7 @@
 import * as THREE from 'three';
-import { MAZE_SCALE } from './constants.js';
 import { entryCoords, wallCoords_1, wallCoords_2, wallCoords_3, connector1_2_coords, connector2_3_coords, connector3_4_coords, connector4_5_coords,connector5_6_coords } from './mazeData.js';
 import{ updateCollisionBoxes } from './collision.js';
-import { textures } from './textures.js';
+import { materials } from './materials.js';
 
  function createPlaneWall(size, material) {
     const geometry = new THREE.PlaneGeometry(size, size);
@@ -25,11 +24,8 @@ function createMaze(material, wallCoords, boxHeight=2) {
     const dummy = new THREE.Object3D();
 
     wallCoords.forEach((coord, i) => {
-        const scaledX = coord.x * MAZE_SCALE;
-        const scaledZ = coord.z * MAZE_SCALE;
-
-        dummy.position.set(scaledX, boxHeight / 2, scaledZ);
-        dummy.scale.set(MAZE_SCALE, MAZE_SCALE, MAZE_SCALE);
+        dummy.position.set(coord.x, boxHeight / 2, coord.z);
+        dummy.scale.set(1, 1, 1);
         dummy.updateMatrix();
         instancedMesh.setMatrixAt(i, dummy.matrix);
     });
@@ -95,12 +91,11 @@ function createPortal() {
   return portalGroup;
 }
 
-
 function createMap() {
     const global_group = new THREE.Group();
 
     // Entry
-    const entry_walls = createMaze(textures.tileMaterial_029, entryCoords, 2);
+    const entry_walls = createMaze(materials.tileMaterial_029, entryCoords, 2);
     entry_walls.position.set(0, 0, 0);
     entry_walls.updateMatrixWorld(true);
     updateCollisionBoxes(entry_walls);
@@ -111,11 +106,11 @@ function createMap() {
     side_1.updateMatrixWorld(true);
     updateCollisionBoxes(side_1);
 
-    const maze_1 = createMaze(textures.tileMaterial_029, wallCoords_1);
+    const maze_1 = createMaze(materials.tileMaterial_029, wallCoords_1);
 
     maze_1.position.set(0, 0, 0);
 
-    const plane_1 = createPlaneWall(27, textures.woodFloorMaterial_017);
+    const plane_1 = createPlaneWall(27, materials.woodFloorMaterial_017);
     plane_1.position.set(9.5, 0, -9.5);
 
     side_1.add(maze_1);
@@ -128,7 +123,7 @@ function createMap() {
 
 
     //side 1 to side 2 connection
-    const connection_1 = createMaze(textures.tileMaterial_029, connector1_2_coords,  3.5);
+    const connection_1 = createMaze(materials.tileMaterial_029, connector1_2_coords,  3.5);
     connection_1.position.set(0, 0, 0);
     
     connection_1.updateMatrixWorld(true);
@@ -144,10 +139,10 @@ function createMap() {
     side_2.updateMatrixWorld(true);
     updateCollisionBoxes(side_2);    
 
-    const maze_2 = createMaze(textures.tileMaterial_101, wallCoords_2);
+    const maze_2 = createMaze(materials.tileMaterial_101, wallCoords_2);
     maze_2.position.set(0, 0, 0);
 
-    const plane_2 = createPlaneWall(27, textures.PavingStonesMaterial_126A);
+    const plane_2 = createPlaneWall(27, materials.PavingStonesMaterial_126A);
     plane_2.position.set(9.5, 0, -9.5);
 
     side_2.add(maze_2);
@@ -163,7 +158,7 @@ function createMap() {
 
 
     //side 2 to side 3 connection
-    const connection_2 = createMaze(textures.tileMaterial_101, connector2_3_coords,  3.5);
+    const connection_2 = createMaze(materials.tileMaterial_101, connector2_3_coords,  3.5);
 
     connection_2.position.set(0, 0, 0);
     connection_2.rotation.x = Math.PI/2;
@@ -178,10 +173,10 @@ function createMap() {
     side_3.updateMatrixWorld(true);
     updateCollisionBoxes(side_3);
 
-    const maze_3 = createMaze(textures.DiamondPlateTexture_008D, wallCoords_3);
+    const maze_3 = createMaze(materials.DiamondPlateTexture_008D, wallCoords_3);
     maze_3.position.set(0, 0, 0);
 
-    const plane_3 = createPlaneWall(27, textures.rubberMaterial_004);
+    const plane_3 = createPlaneWall(27, materials.rubberMaterial_004);
     plane_3.position.set(9.5, 0, -9.5);
 
     side_3.add(maze_3);
@@ -197,7 +192,7 @@ function createMap() {
 
 
     //side 3 to side 4 connection
-    const connection_3 = createMaze(textures.DiamondPlateTexture_008D, connector3_4_coords,  3.5);
+    const connection_3 = createMaze(materials.DiamondPlateTexture_008D, connector3_4_coords,  3.5);
 
     connection_3.rotation.z = -Math.PI/2;
     connection_3.position.set(-4, 11, 5);
@@ -212,10 +207,10 @@ function createMap() {
     side_4.updateMatrixWorld(true);
     updateCollisionBoxes(side_4);
 
-    const maze_4 = createMaze(textures.tileMaterial_074, wallCoords_1);
+    const maze_4 = createMaze(materials.tileMaterial_074, wallCoords_1);
     maze_4.position.set(0, 0, 0);
 
-    const plane_4 = createPlaneWall(27, textures.tileMaterial_081);
+    const plane_4 = createPlaneWall(27, materials.tileMaterial_081);
     plane_4.position.set(9.5, 0, -9.5);
 
     side_4.add(maze_4);
@@ -233,7 +228,7 @@ function createMap() {
 
 
     //side 4 to side 5 connection
-    const connection_4 = createMaze(textures.tileMaterial_074, connector4_5_coords,  3.5);
+    const connection_4 = createMaze(materials.tileMaterial_074, connector4_5_coords,  3.5);
 
     connection_4.rotation.z = Math.PI/2;
     connection_4.position.set(23, 4, 1);
@@ -250,10 +245,10 @@ function createMap() {
     side_5.updateMatrixWorld(true);
     updateCollisionBoxes(side_5);
 
-    const maze_5 = createMaze(textures.tileMaterial_075, wallCoords_2);
+    const maze_5 = createMaze(materials.tileMaterial_075, wallCoords_2);
     maze_5.position.set(0, 0, 0);
 
-    const plane_5 = createPlaneWall(27, textures.woodFloorMaterial_048);
+    const plane_5 = createPlaneWall(27, materials.woodFloorMaterial_048);
     plane_5.position.set(9.5, 0, -9.5);
 
     side_5.add(maze_5);
@@ -270,7 +265,7 @@ function createMap() {
 
     
     //side 5 to side 6 connection
-    const connection_5 = createMaze(textures.tileMaterial_075, connector5_6_coords,  2);
+    const connection_5 = createMaze(materials.tileMaterial_075, connector5_6_coords,  2);
 
     connection_5.rotation.z  = Math.PI/2;
     connection_5.rotation.x = Math.PI/2;
@@ -288,12 +283,12 @@ function createMap() {
     side_6.updateMatrixWorld(true);
     updateCollisionBoxes(side_6);
 
-    const plane_6 = createPlaneWall(27, textures.metalWalkwayMaterial_010);
+    const plane_6 = createPlaneWall(27, materials.metalWalkwayMaterial_010);
     plane_6.position.set(9.5, 0, -9.5);
     
     const portal = createPortal();
-    portal.scale.set(0.5, 0.5, 0.5); // Scale down the portal
-    portal.position.set(-4, 1.5, -9.5); // Adjust height to 3 units
+    portal.scale.set(0.5, 0.5, 0.5);
+    portal.position.set(-4, 1.5, -9.5);
     portal.rotation.x = Math.PI;
     portal.rotation.y = Math.PI/2;
 
