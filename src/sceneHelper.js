@@ -91,6 +91,7 @@ function onMouseMove(event) {
         return;
     }
 
+    // Handle camera rotation based on the current face
     switch (currentFace) {
         case 'bottom':
             camera.rotation.order = 'YXZ';

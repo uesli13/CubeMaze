@@ -49,7 +49,11 @@ body, html {
     transition: background 0.3s;
 }
 
-#mainMenu button:hover {
+button {
+    transition: background 0.3s;
+}
+
+button:hover {
     background: #0056b3;
 }
 

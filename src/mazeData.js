@@ -1,5 +1,4 @@
-// src/mazeData.js
-
+// Coordinates all the walls and connectors in the maze
 
 export const entryCoords = [
     { x: 3, y: 0, z: 1 },
