@@ -1,12 +1,32 @@
 import sceneElements from './sceneElements.js';
 import { initEmptyScene, render } from './sceneHelper.js';
 import { load3DObjects } from './objects.js';
-import { setupControls, updateMovement } from './controls.js';
+import { currentFace, setupControls, updateMovement } from './controls.js';
 import { setupMainMenu } from './menu.js';
 import { startTimer,  } from './timer.js';
+import { switchFace } from './controls.js';
+import { resetControls } from './controls.js';
 
-let prevTime = 0;
-let gameStarted = false;
+export let prevTime = 0;
+export let gameStarted = false;
+
+export function resetGame() {
+
+    // Reset the game state
+    gameStarted = false;
+    prevTime = 0;
+    sceneElements.isGameWon = false;
+
+    // Reset camera position and orientation
+    sceneElements.camera.position.set(5, 1.5, 3);
+    sceneElements.camera.rotation.set(0, 0, 0);
+
+    switchFace('bottom');
+
+    // Reset controls
+    resetControls();
+    setupControls();
+}
 
 function animate(time) {
     if (!gameStarted) {
@@ -14,7 +34,6 @@ function animate(time) {
         requestAnimationFrame(animate);
         return;
     }
-
     const deltaTime = (time - prevTime) / 1000;
     prevTime = time;
     updateMovement(deltaTime);
@@ -25,9 +44,9 @@ function animate(time) {
 
 function init() {
     // Initialize the scene but don't start the game yet
-    initEmptyScene(sceneElements);
+    initEmptyScene();
     load3DObjects(sceneElements.sceneGraph);
-    setupControls(sceneElements);
+    setupControls();
 
     setupMainMenu(() => {
         gameStarted = true;

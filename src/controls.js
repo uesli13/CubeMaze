@@ -7,6 +7,12 @@ let keyW = false, keyA = false, keyS = false, keyD = false;
 let keyQ = false, keyE = false;
 let key1 = false, key2 = false, key3 = false, key4 = false, key5 = false, key6 = false;
 
+export function resetControls() {
+    keyW = keyA = keyS = keyD = false;
+    keyQ = keyE = false;
+    key1 = key2 = key3 = key4 = key5 = key6 = false;
+}
+
 let targetRotation = new THREE.Euler(0, 0, 0); // Target rotation
 let isRotating = false;
 
@@ -53,7 +59,7 @@ export function setupControls() {
 }
 
 // Switch active face
-function switchFace(faceName) {
+export function switchFace(faceName) {
     const face = cubeFaces[faceName];
     if (!face) return;
 
@@ -141,9 +147,9 @@ function moveToWinningPosition(camera) {
 }
 
 // Handle movement
-export function updateMovement(deltaTime) {
+export function updateMovement(deltaTime) {    
     const camera = sceneElements.camera;
-    
+
     // Check for winning condition on top face
     if (currentFace === 'top') {
         handleWinning(camera);
@@ -199,16 +205,9 @@ export function updateMovement(deltaTime) {
         camera.position.add(moveDirection);
     }
 
-    // Collision detection
-
-    // if (checkCollisions(camera.position)) {
-    //     camera.position.copy(oldPosition);
-    // }
-
     const proposedPosition = camera.position.clone();
     const correctedPosition = trySlide(oldPosition, proposedPosition);
     camera.position.copy(correctedPosition);
-
 
     // Clamp the camera's position to stay within the map boundaries
     camera.position.x = THREE.MathUtils.clamp(camera.position.x, sceneElements.BOUNDARIES.x.min, sceneElements.BOUNDARIES.x.max);
